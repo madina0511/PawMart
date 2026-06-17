@@ -13,6 +13,16 @@ input CreateOrderInput {
   shippingAddress: ShippingAddressInput!
 }
 
+input CreatePetInput {
+  age: Float
+  avatar: String
+  breed: String
+  healthNotes: String
+  name: String!
+  species: String!
+  weight: Float
+}
+
 input CreateProductInput {
   brand: String
   category: ProductCategory!
@@ -32,12 +42,15 @@ input LoginInput {
 
 type Mutation {
   createOrder(input: CreateOrderInput!): OrderType!
+  createPet(createPetInput: CreatePetInput!): Pet!
   createProduct(input: CreateProductInput!): ProductType!
+  deletePet(id: ID!): Boolean!
   deleteProduct(id: ID!): Boolean!
   login(input: LoginInput!): AuthType!
   refreshTokens(refreshToken: String!): AuthType!
   register(input: RegisterInput!): AuthType!
   updateOrderStatus(input: UpdateOrderInput!): OrderType!
+  updatePet(id: ID!, updatePetInput: UpdatePetInput!): Pet!
   updateProduct(input: UpdateProductInput!): ProductType!
 }
 
@@ -68,6 +81,18 @@ type OrderType {
   status: OrderStatus!
   totalAmount: Float!
   userId: ID!
+}
+
+type Pet {
+  _id: ID!
+  age: Float
+  avatar: String
+  breed: String
+  healthNotes: String
+  name: String!
+  species: String!
+  userId: ID!
+  weight: Float
 }
 
 enum PetType {
@@ -105,7 +130,9 @@ type Query {
   allOrders: [OrderType!]!
   hello: String!
   myOrders: [OrderType!]!
+  myPets: [Pet!]!
   order(id: ID!): OrderType!
+  pet(id: ID!): Pet!
   product(id: ID!): ProductType!
   products: [ProductType!]!
   productsByCategory(category: String!): [ProductType!]!
@@ -134,6 +161,16 @@ type ShippingAddressType {
 input UpdateOrderInput {
   _id: ID!
   status: OrderStatus!
+}
+
+input UpdatePetInput {
+  age: Float
+  avatar: String
+  breed: String
+  healthNotes: String
+  name: String
+  species: String
+  weight: Float
 }
 
 input UpdateProductInput {
