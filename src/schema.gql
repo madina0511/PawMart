@@ -1,0 +1,163 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthType {
+  accessToken: String!
+  refreshToken: String!
+  user: UserType!
+}
+
+input CreateOrderInput {
+  items: [OrderItemInput!]!
+  shippingAddress: ShippingAddressInput!
+}
+
+input CreateProductInput {
+  brand: String
+  category: ProductCategory!
+  description: String!
+  images: [String!]
+  name: String!
+  petType: [PetType!]!
+  price: Float!
+  stock: Int!
+  tags: [String!]
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createOrder(input: CreateOrderInput!): OrderType!
+  createProduct(input: CreateProductInput!): ProductType!
+  deleteProduct(id: ID!): Boolean!
+  login(input: LoginInput!): AuthType!
+  refreshTokens(refreshToken: String!): AuthType!
+  register(input: RegisterInput!): AuthType!
+  updateOrderStatus(input: UpdateOrderInput!): OrderType!
+  updateProduct(input: UpdateProductInput!): ProductType!
+}
+
+input OrderItemInput {
+  productId: ID!
+  quantity: Int!
+}
+
+type OrderItemType {
+  price: Float!
+  productId: ID!
+  quantity: Int!
+}
+
+enum OrderStatus {
+  CANCELLED
+  DELIVERED
+  PAID
+  PENDING
+  SHIPPING
+}
+
+type OrderType {
+  _id: ID!
+  items: [OrderItemType!]!
+  paymentId: String
+  shippingAddress: ShippingAddressType!
+  status: OrderStatus!
+  totalAmount: Float!
+  userId: ID!
+}
+
+enum PetType {
+  BIRD
+  CAT
+  DOG
+  FISH
+  OTHER
+}
+
+enum ProductCategory {
+  ACCESSORY
+  CARE
+  FOOD
+  MEDICINE
+  TOY
+}
+
+type ProductType {
+  _id: ID!
+  brand: String
+  category: ProductCategory!
+  description: String!
+  images: [String!]!
+  name: String!
+  petType: [PetType!]!
+  price: Float!
+  rating: Float!
+  reviewCount: Int!
+  stock: Int!
+  tags: [String!]!
+}
+
+type Query {
+  allOrders: [OrderType!]!
+  hello: String!
+  myOrders: [OrderType!]!
+  order(id: ID!): OrderType!
+  product(id: ID!): ProductType!
+  products: [ProductType!]!
+  productsByCategory(category: String!): [ProductType!]!
+  productsByPetType(petType: String!): [ProductType!]!
+  searchProducts(query: String!): [ProductType!]!
+}
+
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+input ShippingAddressInput {
+  address: String!
+  name: String!
+  phone: String!
+}
+
+type ShippingAddressType {
+  address: String!
+  name: String!
+  phone: String!
+}
+
+input UpdateOrderInput {
+  _id: ID!
+  status: OrderStatus!
+}
+
+input UpdateProductInput {
+  _id: ID!
+  brand: String
+  category: ProductCategory
+  description: String
+  images: [String!]
+  name: String
+  petType: [PetType!]
+  price: Float
+  stock: Int
+  tags: [String!]
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+type UserType {
+  _id: ID!
+  avatar: String
+  email: String!
+  name: String!
+  role: UserRole!
+}
