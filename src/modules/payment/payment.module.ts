@@ -5,6 +5,7 @@ import { PaymentResolver } from './payment.resolver';
 import { Payment, PaymentSchema } from './payment.schema';
 import { AuthModule } from '../auth/auth.module';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Order, OrderSchema } from '../orders/schemas/order.schema';
       { name: Order.name, schema: OrderSchema },
     ]),
     AuthModule,
+    MailModule,
   ],
   providers: [PaymentService, PaymentResolver],
   exports: [PaymentService],

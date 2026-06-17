@@ -8,8 +8,9 @@ import { AiModule } from './ai/ai.module';
 import { PaymentModule } from './payment/payment.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ProductsModule, OrdersModule, PetsModule, AiModule, PaymentModule, CloudinaryModule, ReviewsModule],
+  imports: [AuthModule, UsersModule, ProductsModule, OrdersModule, PetsModule, AiModule, PaymentModule, CloudinaryModule, ReviewsModule, MailModule],
 })
 export class ModulesModule {}

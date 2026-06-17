@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import axios from 'axios';
 import { Payment, PaymentDocument, PaymentStatus } from './payment.schema';
-
+import { MailService } from '../mail/mail.service';
 import { ConfirmPaymentInput } from './dto/confirm-payment.input';
 import { CancelPaymentInput } from './dto/cancel-payment.input';
 import { getErrorMessage } from '../../common/utils/error.util';
@@ -18,6 +18,7 @@ export class PaymentService {
   constructor(
     @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    private readonly mailService: MailService,
   ) {}
 
   private getAuthHeader() {
@@ -67,7 +68,21 @@ export class PaymentService {
         status: 'PAID',
         paymentId: payment._id,
       });
-
+      // 4. Email yuborish
+      const order = await this.orderModel
+        .findById(input.orderId)
+        .populate('userId');
+      if (order && order.userId) {
+        const user = order.userId as any;
+        this.mailService
+          .sendPaymentConfirmed(
+            user.email,
+            user.name,
+            input.orderId,
+            input.amount,
+          )
+          .catch(() => {});
+      }
       this.logger.log(`Payment confirmed: ${payment._id}`);
       return payment;
     } catch (error) {

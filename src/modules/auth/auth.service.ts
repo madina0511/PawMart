@@ -12,6 +12,7 @@ import { RegisterInput } from './dto/register.input';
 import { LoginInput } from './dto/login.input';
 import { AuthType } from './dto/auth.type';
 import { getErrorMessage } from '../../common/utils/error.util';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
   private generateTokens(userId: string, role: string) {
@@ -52,6 +54,8 @@ export class AuthService {
         user._id.toString(),
         user.role,
       );
+      // Email yuborish (await qilmaymiz — sekin bo'lishi mumkin)
+      this.mailService.sendWelcome(user.email, user.name).catch(() => {});
       this.logger.log(`User registered: ${user._id}`);
       return { accessToken, refreshToken, user: user as any };
     } catch (error) {

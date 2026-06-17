@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { JwtStrategy } from './jwt.strategy';
-
+import { MailModule } from '../mail/mail.module';
 import { UsersModule } from '../users/users.module';
 import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 
@@ -21,6 +21,7 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
       inject: [ConfigService],
     }),
     UsersModule,
+    MailModule,
   ],
   providers: [AuthService, AuthResolver, JwtStrategy, JwtRefreshStrategy],
   exports: [AuthService, JwtModule],
