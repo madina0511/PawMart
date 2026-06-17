@@ -5,7 +5,7 @@ import { Product, ProductDocument } from './schemas/product.schema';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
 import { getErrorMessage } from '../../common/utils/error.util';
-
+import { OpenAIEmbeddings } from '@langchain/openai';
 @Injectable()
 export class ProductsService {
   private readonly logger = new Logger(ProductsService.name);
@@ -82,7 +82,18 @@ export class ProductsService {
   async create(input: CreateProductInput) {
     this.logger.log(`Creating product: ${input.name}`);
     try {
-      const product = await this.productModel.create(input);
+      const embeddings = new OpenAIEmbeddings({
+        modelName: 'text-embedding-3-small',
+        openAIApiKey: process.env.OPENROUTER_API_KEY,
+        configuration: {
+          baseURL: 'https://openrouter.ai/api/v1',
+        },
+      });
+
+      const text = `${input.name} ${input.description} ${input.category} ${input.petType}`;
+      const embedding = await embeddings.embedQuery(text);
+
+      const product = await this.productModel.create({ ...input, embedding });
       this.logger.log(`Product created: ${product._id}`);
       return product.toObject();
     } catch (error) {
@@ -90,7 +101,6 @@ export class ProductsService {
       throw error;
     }
   }
-
   async update(input: UpdateProductInput) {
     this.logger.log(`Updating product: ${input._id}`);
     try {

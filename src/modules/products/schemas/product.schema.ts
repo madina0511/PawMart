@@ -53,6 +53,9 @@ export class Product {
 
   @Prop({ default: 0 })
   reviewCount: number;
+
+  @Prop({ type: [Number], default: [] })
+  embedding: number[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

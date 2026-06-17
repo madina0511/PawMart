@@ -4,8 +4,9 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { PetsModule } from './pets/pets.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ProductsModule, OrdersModule, PetsModule],
+  imports: [AuthModule, UsersModule, ProductsModule, OrdersModule, PetsModule, AiModule],
 })
 export class ModulesModule {}
