@@ -8,20 +8,17 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Resolver()
-@UseGuards(JwtAuthGuard)
 export class AiResolver {
   private readonly logger = new Logger(AiResolver.name);
 
   constructor(private readonly aiService: AiService) {}
 
+  // ✅ Public — login shart emas
   @Mutation(() => AiResponse)
-  async askAI(
-    @CurrentUser() user: any,
-    @Args('askAiInput') askAiInput: AskAiInput,
-  ): Promise<AiResponse> {
-    this.logger.log(`askAI called by user: ${user._id}`);
+  async askAI(@Args('askAiInput') askAiInput: AskAiInput): Promise<AiResponse> {
+    this.logger.log(`askAI called`);
     return this.aiService.askAI(
-      user._id.toString(),
+      'guest',
       askAiInput.question,
       askAiInput.petId,
       askAiInput.sessionId,
@@ -32,13 +29,13 @@ export class AiResolver {
   async chatHistory(
     @Args('sessionId', { type: () => ID }) sessionId: string,
   ): Promise<ChatSession> {
-    this.logger.log(`chatHistory called: ${sessionId}`);
     return this.aiService.getChatHistory(sessionId);
   }
 
+  // ✅ Login kerak
+  @UseGuards(JwtAuthGuard)
   @Query(() => [ChatSession])
   async mySessions(@CurrentUser() user: any): Promise<ChatSession[]> {
-    this.logger.log(`mySessions called by user: ${user._id}`);
     return this.aiService.getUserSessions(user._id.toString());
   }
 }

@@ -1,30 +1,23 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { Logger, UseGuards } from '@nestjs/common';
 import { PetsService } from './pets.service';
-import { Pet } from './pet.schema';
+import { Pet, PetSpecies } from './pet.schema';
 import { CreatePetInput } from './dto/create-pet.input';
 import { UpdatePetInput } from './dto/update-pet.input';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/schemas/user.schema';
 
 @Resolver(() => Pet)
-@UseGuards(JwtAuthGuard)
 export class PetsResolver {
   private readonly logger = new Logger(PetsResolver.name);
   constructor(private readonly petsService: PetsService) {}
 
-  @Mutation(() => Pet)
-  async createPet(
-    @CurrentUser() user: any,
-    @Args('createPetInput') createPetInput: CreatePetInput,
-  ): Promise<Pet> {
-    this.logger.log('createPet called');
-    return this.petsService.create(user._id.toString(), createPetInput);
-  }
-
+  // ✅ Public queries
   @Query(() => [Pet])
-  async myPets(@CurrentUser() user: any): Promise<Pet[]> {
-    return this.petsService.findByUser(user._id.toString());
+  async pets(): Promise<Pet[]> {
+    return this.petsService.findAll();
   }
 
   @Query(() => Pet)
@@ -32,14 +25,27 @@ export class PetsResolver {
     return this.petsService.findById(id);
   }
 
+  // ✅ Admin only mutations
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Mutation(() => Pet)
+  async createPet(@Args('input') input: CreatePetInput): Promise<Pet> {
+    this.logger.log('createPet called');
+    return this.petsService.create(input);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Mutation(() => Pet)
   async updatePet(
     @Args('id', { type: () => ID }) id: string,
-    @Args('updatePetInput') updatePetInput: UpdatePetInput,
+    @Args('input') input: UpdatePetInput,
   ): Promise<Pet> {
-    return this.petsService.update(id, updatePetInput);
+    return this.petsService.update(id, input);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Mutation(() => Boolean)
   async deletePet(
     @Args('id', { type: () => ID }) id: string,

@@ -21,6 +21,7 @@ import { ModulesModule } from './modules/modules.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      context: ({ req, res }) => ({ req, res }), // Ya'ni res.cookie() ishlatish uchun kerak — biz httpOnly cookie
       sortSchema: true,
       playground: true,
       csrfPrevention: false,

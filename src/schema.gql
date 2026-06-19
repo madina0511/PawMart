@@ -34,7 +34,6 @@ type ChatSession {
   _id: ID!
   messages: [ChatMessage!]!
   petId: ID
-  userId: ID!
 }
 
 input ConfirmPaymentInput {
@@ -51,11 +50,16 @@ input CreateOrderInput {
 
 input CreatePetInput {
   age: Float
-  avatar: String
   breed: String
-  healthNotes: String
+  color: String
+  description: String
+  images: [String!]! = []
   name: String!
-  species: String!
+  neutered: Boolean
+  price: Float!
+  species: PetSpecies!
+  status: PetStatus! = AVAILABLE
+  vaccinated: Boolean
   weight: Float
 }
 
@@ -93,7 +97,7 @@ type Mutation {
   cancelPayment(cancelPaymentInput: CancelPaymentInput!): Payment!
   confirmPayment(confirmPaymentInput: ConfirmPaymentInput!): Payment!
   createOrder(input: CreateOrderInput!): OrderType!
-  createPet(createPetInput: CreatePetInput!): Pet!
+  createPet(input: CreatePetInput!): Pet!
   createProduct(input: CreateProductInput!): ProductType!
   createReview(createReviewInput: CreateReviewInput!): Review!
   deletePet(id: ID!): Boolean!
@@ -103,7 +107,7 @@ type Mutation {
   refreshTokens(refreshToken: String!): AuthType!
   register(input: RegisterInput!): AuthType!
   updateOrderStatus(input: UpdateOrderInput!): OrderType!
-  updatePet(id: ID!, updatePetInput: UpdatePetInput!): Pet!
+  updatePet(id: ID!, input: UpdatePetInput!): Pet!
   updateProduct(input: UpdateProductInput!): ProductType!
   updateReview(id: ID!, updateReviewInput: UpdateReviewInput!): Review!
 }
@@ -152,13 +156,32 @@ type Payment {
 type Pet {
   _id: ID!
   age: Float
-  avatar: String
   breed: String
-  healthNotes: String
+  color: String
+  description: String
+  images: [String!]!
   name: String!
-  species: String!
-  userId: ID!
+  neutered: Boolean
+  price: Float!
+  species: PetSpecies!
+  status: PetStatus!
+  vaccinated: Boolean
   weight: Float
+}
+
+enum PetSpecies {
+  BIRD
+  CAT
+  DOG
+  FISH
+  OTHER
+  RABBIT
+}
+
+enum PetStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
 }
 
 enum PetType {
@@ -197,12 +220,12 @@ type Query {
   chatHistory(sessionId: ID!): ChatSession!
   hello: String!
   myOrders: [OrderType!]!
-  myPets: [Pet!]!
   myReviews: [Review!]!
   mySessions: [ChatSession!]!
   order(id: ID!): OrderType!
   paymentByOrder(orderId: ID!): Payment
   pet(id: ID!): Pet!
+  pets: [Pet!]!
   product(id: ID!): ProductType!
   products: [ProductType!]!
   productsByCategory(category: String!): [ProductType!]!
@@ -245,11 +268,16 @@ input UpdateOrderInput {
 
 input UpdatePetInput {
   age: Float
-  avatar: String
   breed: String
-  healthNotes: String
+  color: String
+  description: String
+  images: [String!]
   name: String
-  species: String
+  neutered: Boolean
+  price: Float
+  species: PetSpecies
+  status: PetStatus
+  vaccinated: Boolean
   weight: Float
 }
 

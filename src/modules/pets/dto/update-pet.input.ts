@@ -1,6 +1,12 @@
 import { InputType, Field, Float } from '@nestjs/graphql';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { PetSpecies } from '../pet.schema';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
+import { PetSpecies, PetStatus } from '../pet.schema';
 
 @InputType()
 export class UpdatePetInput {
@@ -9,28 +15,57 @@ export class UpdatePetInput {
   @IsString()
   name?: string;
 
-  @Field({ nullable: true })
+  @Field(() => PetSpecies, { nullable: true })
   @IsOptional()
   @IsEnum(PetSpecies)
   species?: PetSpecies;
 
   @Field({ nullable: true })
   @IsOptional()
+  @IsString()
   breed?: string;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
+  @IsNumber()
   age?: number;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
+  @IsNumber()
   weight?: number;
 
-  @Field({ nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
-  healthNotes?: string;
+  @IsNumber()
+  price?: number;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  images?: string[];
 
   @Field({ nullable: true })
   @IsOptional()
-  avatar?: string;
+  @IsString()
+  description?: string;
+
+  @Field(() => PetStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(PetStatus)
+  status?: PetStatus;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  color?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  vaccinated?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  neutered?: boolean;
 }

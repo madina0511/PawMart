@@ -22,9 +22,8 @@ export class ChatSession {
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  @Field(() => ID)
-  userId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  userId?: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Pet' })
   @Field(() => ID, { nullable: true })

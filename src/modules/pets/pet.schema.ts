@@ -5,6 +5,7 @@ import {
   Field,
   ID,
   Float,
+  Int,
   registerEnumType,
 } from '@nestjs/graphql';
 
@@ -19,7 +20,14 @@ export enum PetSpecies {
   OTHER = 'OTHER',
 }
 
+export enum PetStatus {
+  AVAILABLE = 'AVAILABLE',
+  SOLD = 'SOLD',
+  RESERVED = 'RESERVED',
+}
+
 registerEnumType(PetSpecies, { name: 'PetSpecies' });
+registerEnumType(PetStatus, { name: 'PetStatus' });
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -27,17 +35,13 @@ export class Pet {
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  @Field(() => ID)
-  userId: Types.ObjectId;
-
   @Prop({ required: true })
   @Field()
   name: string;
 
   @Prop({ required: true, enum: PetSpecies })
-  @Field()
-  species: string;
+  @Field(() => PetSpecies)
+  species: PetSpecies;
 
   @Prop()
   @Field({ nullable: true })
@@ -51,13 +55,33 @@ export class Pet {
   @Field(() => Float, { nullable: true })
   weight?: number;
 
-  @Prop()
-  @Field({ nullable: true })
-  healthNotes?: string;
+  @Prop({ required: true })
+  @Field(() => Float)
+  price: number;
+
+  @Prop({ type: [String], default: [] })
+  @Field(() => [String])
+  images: string[];
 
   @Prop()
   @Field({ nullable: true })
-  avatar?: string;
+  description?: string;
+
+  @Prop({ required: true, enum: PetStatus, default: PetStatus.AVAILABLE })
+  @Field(() => PetStatus)
+  status: PetStatus;
+
+  @Prop()
+  @Field({ nullable: true })
+  color?: string;
+
+  @Prop()
+  @Field(() => Boolean, { nullable: true })
+  vaccinated?: boolean;
+
+  @Prop()
+  @Field(() => Boolean, { nullable: true })
+  neutered?: boolean;
 }
 
 export const PetSchema = SchemaFactory.createForClass(Pet);

@@ -2,10 +2,9 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Pet, PetDocument } from './pet.schema';
-
 import { getErrorMessage } from '../../common/utils/error.util';
-import { UpdatePetInput } from './dto/update-pet.input';
 import { CreatePetInput } from './dto/create-pet.input';
+import { UpdatePetInput } from './dto/update-pet.input';
 
 @Injectable()
 export class PetsService {
@@ -13,12 +12,9 @@ export class PetsService {
 
   constructor(@InjectModel(Pet.name) private petModel: Model<PetDocument>) {}
 
-  async create(userId: string, createPetInput: CreatePetInput): Promise<Pet> {
+  async create(createPetInput: CreatePetInput): Promise<Pet> {
     try {
-      const pet = new this.petModel({
-        ...createPetInput,
-        userId: new Types.ObjectId(userId),
-      });
+      const pet = new this.petModel(createPetInput);
       return await pet.save();
     } catch (error) {
       this.logger.error(`create: ${getErrorMessage(error)}`);
@@ -26,20 +22,25 @@ export class PetsService {
     }
   }
 
-  async findByUser(userId: string): Promise<Pet[]> {
+  async findAll(): Promise<Pet[]> {
     try {
-      return await this.petModel.find({ userId: new Types.ObjectId(userId) });
+      return await this.petModel.aggregate([
+        { $match: {} },
+        { $sort: { createdAt: -1 } },
+      ]);
     } catch (error) {
-      this.logger.error(`findByUser: ${getErrorMessage(error)}`);
+      this.logger.error(`findAll: ${getErrorMessage(error)}`);
       throw error;
     }
   }
 
   async findById(id: string): Promise<Pet> {
     try {
-      const pet = await this.petModel.findById(id);
-      if (!pet) throw new NotFoundException('Pet not found');
-      return pet;
+      const result = await this.petModel.aggregate([
+        { $match: { _id: new Types.ObjectId(id) } },
+      ]);
+      if (!result[0]) throw new NotFoundException('Pet not found');
+      return result[0];
     } catch (error) {
       this.logger.error(`findById: ${getErrorMessage(error)}`);
       throw error;

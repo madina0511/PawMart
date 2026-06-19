@@ -5,12 +5,14 @@ import { AiResolver } from './ai.resolver';
 import { ChatSession, ChatSessionSchema } from './chat-session.schema';
 import { AuthModule } from '../auth/auth.module';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
+import { Pet, PetSchema } from '../pets/pet.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: ChatSession.name, schema: ChatSessionSchema },
       { name: Product.name, schema: ProductSchema },
+      { name: Pet.name, schema: PetSchema },
     ]),
     AuthModule,
   ],

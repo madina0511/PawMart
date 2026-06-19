@@ -10,6 +10,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
 import mongoose from 'mongoose';
+import { Pet } from '../pets/pet.schema';
 
 @Injectable()
 export class AiService {
@@ -21,6 +22,7 @@ export class AiService {
     @InjectModel(ChatSession.name)
     private chatSessionModel: Model<ChatSessionDocument>,
     @InjectModel(Product.name) private productModel: Model<any>,
+    @InjectModel(Pet.name) private petModel: Model<any>, // ✅
   ) {
     this.llm = new ChatOpenAI({
       modelName: 'openai/gpt-4o-mini',
@@ -54,7 +56,7 @@ export class AiService {
 
       if (!session) {
         session = new this.chatSessionModel({
-          userId: new Types.ObjectId(userId),
+          userId: userId === 'guest' ? null : new Types.ObjectId(userId),
           petId: petId ? new Types.ObjectId(petId) : undefined,
           messages: [],
         });
@@ -87,6 +89,26 @@ export class AiService {
       } catch (e) {
         this.logger.warn(`Vector search failed: ${getErrorMessage(e)}`);
       }
+
+      // ✅ 4. Pet context
+      let petContext = '';
+      try {
+        const availablePets = await this.petModel
+          .find({ status: 'AVAILABLE' })
+          .select('name species breed age price description vaccinated color')
+          .limit(10)
+          .lean();
+
+        petContext = availablePets
+          .map(
+            (p) =>
+              `Pet: ${p.name} | Species: ${p.species} | Breed: ${p.breed || 'Unknown'} | Age: ${p.age || '?'} years | Price: ₩${p.price?.toLocaleString()} | Vaccinated: ${p.vaccinated ? 'Yes' : 'No'}`,
+          )
+          .join('\n');
+        this.logger.log(`Pet context: ${availablePets.length} pets found`);
+      } catch (e) {
+        this.logger.warn(`Pet context failed: ${getErrorMessage(e)}`);
+      }
       // 4. Prompt
       const prompt = PromptTemplate.fromTemplate(`
 You are PawMart AI assistant - a friendly, knowledgeable assistant for PawMart pet shop.
@@ -94,18 +116,21 @@ You are PawMart AI assistant - a friendly, knowledgeable assistant for PawMart p
 You can help with:
 1. 🐾 Pet health & care advice (nutrition, exercise, grooming, common illnesses)
 2. 🛍️ Product recommendations based on pet type, age, and needs
-3. 🏪 PawMart store info:
+3. 🐶 Pet adoption recommendations from our available pets
+4. 🏪 PawMart store info:
    - Shipping: 2-3 business days, free over 50,000 KRW
    - Returns: 7 days return policy
    - Payment: Toss Payments (card, kakao pay, naver pay)
    - Customer service: pawmart@support.com
-4. 🏥 General veterinary advice (always recommend vet for serious issues)
-5. 💬 Any pet-related questions
-6.Do not use markdown formatting, line breaks or special characters in your response. Write in plain text only.
+5. 🏥 General veterinary advice (always recommend vet for serious issues)
+6. Do not use markdown formatting, line breaks or special characters in your response. Write in plain text only.
+
 
 Product catalog:
 {productContext}
 
+Available pets for adoption:
+{petContext} 
 Chat history:
 {history}
 
@@ -129,6 +154,7 @@ If the question is in Uzbek, answer in Uzbek.
         productContext,
         history: historyText,
         question,
+        petContext,
       });
       this.logger.log(`Product context: ${productContext}`);
       // 6. Messages saqlash
